@@ -10,6 +10,6 @@ import com.project.sns.model.entity.UserEntity;
 @Repository
 public interface UserEntityRepository extends JpaRepository<UserEntity, Integer>{
 
-    Optional<UserEntity> findByUserName(String username);
+    Optional<UserEntity> findByUserName(String userName);
     
 }

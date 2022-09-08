@@ -1,5 +1,6 @@
 package com.project.sns.controller;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import com.project.sns.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
+// @CrossOrigin(origins="*")
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
 public class UserController {

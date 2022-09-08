@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.project.sns.exception.ErrorCode;
 import com.project.sns.exception.SnsApplicationException;
 import com.project.sns.fixture.UserEntityFixture;
 import com.project.sns.model.entity.UserEntity;
@@ -58,7 +59,8 @@ public class UserServiceTest {
         when(userEntityRepository.save(any())).thenReturn(Optional.of(fixture));
 
 
-        assertThrows(SnsApplicationException.class, () -> userService.join(userName, password));
+        SnsApplicationException e = assertThrows(SnsApplicationException.class, () -> userService.join(userName, password));
+        assertEquals(ErrorCode.DUPLICATED_USER_NAME, e.getErrorCode());
     }
 
     @DisplayName("로그인이 정상적으로 동작하는 경우")
@@ -70,6 +72,7 @@ public class UserServiceTest {
 
         // mocking
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(fixture));
+        when(encoder.matches(password, fixture.getPassword())).thenReturn(true);
 
         assertDoesNotThrow(() -> userService.login(userName, password));
     }
@@ -83,8 +86,9 @@ public class UserServiceTest {
         // mocking
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.empty());
 
-
-        assertThrows(SnsApplicationException.class, () -> userService.join(userName, password));
+        SnsApplicationException e = assertThrows(SnsApplicationException.class, () -> 
+                                                    userService.join(userName, password));
+        assertEquals(ErrorCode.USER_NOT_FOUND, e.getErrorCode());
     }
 
     @DisplayName("로그인시 password가 틀린 경우")
@@ -99,7 +103,8 @@ public class UserServiceTest {
         // mocking
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(fixture));
 
-        assertThrows(SnsApplicationException.class, () -> userService.join(userName, wrongPassword));
+        SnsApplicationException e =assertThrows(SnsApplicationException.class, () -> userService.join(userName, wrongPassword));
+        assertEquals(ErrorCode.INVALID_PASSWORD, e.getErrorCode());
     }
 
 
