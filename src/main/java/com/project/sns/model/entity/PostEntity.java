@@ -24,7 +24,7 @@ import lombok.Setter;
 @Table(name = "\"post\"")
 @Getter
 @Setter
-@SQLDelete(sql = "UPDATE \"post\" deleted_at = NOW() WHERE id=?")
+@SQLDelete(sql = "UPDATE \"post\" SET deleted_at = NOW() WHERE id=?")
 @Where(clause = "deleted_at is NULL")
 public class PostEntity {
     

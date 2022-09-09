@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -60,7 +61,7 @@ public class PostControllerTest {
     @DisplayName("포스트 작성시 로그인 하지 않은 경우")
     @Test
     @WithAnonymousUser
-    void givenTitle_whenNotLogined_thenReturnError() throws Exception {
+    void givenPost_whenNotLogined_thenReturnError() throws Exception {
         String title = "title";
         String body = "body";
 
@@ -74,7 +75,7 @@ public class PostControllerTest {
     @DisplayName("포스트를 수정하는 경우")
     @Test
     @WithMockUser
-    void givenTitle_when_thenModified() throws Exception {
+    void givenPostForUpdate_when_thenModified() throws Exception {
         String title = "title";
         String body = "body";
 
@@ -91,7 +92,7 @@ public class PostControllerTest {
     @DisplayName("포스트를 수정시 로그인 하지 않은 경우")
     @Test
     @WithAnonymousUser
-    void givenTitle_whenNotLogined_thenError() throws Exception {
+    void givenPostForUpdate_whenNotLogined_thenError() throws Exception {
         String title = "title";
         String body = "body";
 
@@ -105,7 +106,7 @@ public class PostControllerTest {
     @DisplayName("포스트를 수정시 본인이 작성한 글이 아닌 경우")
     @Test
     @WithMockUser
-    void givenTitle_whenUsersPost_thenError() throws Exception {
+    void givenPostForUpdate_whenUsersPost_thenError() throws Exception {
         String title = "title";
         String body = "body";
 
@@ -122,7 +123,7 @@ public class PostControllerTest {
     @DisplayName("포스트를 수정시 수정하려는 글이 없는 경우")
     @Test
     @WithMockUser
-    void givenTitle_whenNotExistedPost_thenError() throws Exception {
+    void givenPostForUpdate_whenNotExistedPost_thenError() throws Exception {
         String title = "title";
         String body = "body";
 
@@ -133,6 +134,54 @@ public class PostControllerTest {
                 .content(objectMapper.writeValueAsBytes(new PostCreateRequest(title, body)))
         ).andDo(print())
         .andExpect(status().isNotFound());
+    }
+    
+    @DisplayName("포스트를 삭제하는 경우")
+    @Test
+    @WithMockUser
+    void givenPost_when_thendeleted() throws Exception {
+
+        mockMvc.perform(delete("/api/v1/posts/1")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+        .andExpect(status().isOk());
+    }
+    
+    @DisplayName("포스트 삭제시 로그인하지 않은 경우")
+    @Test
+    @WithAnonymousUser
+    void givenPostForDelete_whenNotLogined_thenError() throws Exception {
+
+        mockMvc.perform(delete("/api/v1/posts/1")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+        .andExpect(status().isUnauthorized());
+    }
+    
+    @DisplayName("포스트 삭제시 작성자와 삭제 요청자가 다를 경우")
+    @Test
+    @WithMockUser
+    void givenPostForDelete_whenNotEqualsUser_thenError() throws Exception {
+        // mocking
+        doThrow(new SnsApplicationException(ErrorCode.INVALID_PERMISSION)).when(postService).delete(any(), any());
+
+        mockMvc.perform(delete("/api/v1/posts/1")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+        .andExpect(status().isUnauthorized());
+    }
+    
+    @DisplayName("포스트 삭제시 삭제하려는 포스트가 존재하지 않을 경우")
+    @Test
+    @WithMockUser
+    void givenPostForDelete_whenNotExistedPost_thenError() throws Exception {
+        // mocking
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).delete(any(), any());
+
+        mockMvc.perform(delete("/api/v1/posts/1")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+        .andExpect(status().isUnauthorized());
     }
 
 }

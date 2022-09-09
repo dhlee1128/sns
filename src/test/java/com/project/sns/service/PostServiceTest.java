@@ -67,7 +67,7 @@ public class PostServiceTest {
     
     @DisplayName("포스트 수정이 성공한 경우")
     @Test
-    void givenPost_when_thenModified() {
+    void givenPostForUpdate_when_thenModified() {
         String title = "title";
         String body = "body";
         String userName = "userName";
@@ -87,7 +87,7 @@ public class PostServiceTest {
     
     @DisplayName("포스트 수정시 포스트가 존재하지 않는 경우")
     @Test
-    void givenPost_whenNotExistedPost_thenError() {
+    void givenPostForUpdate_whenNotExistedPost_thenError() {
         String title = "title";
         String body = "body";
         String userName = "userName";
@@ -107,7 +107,7 @@ public class PostServiceTest {
     
     @DisplayName("포스트 수정시 권한이 없는 경우")
     @Test
-    void givenPost_whenNotAuthentication_thenError() {
+    void givenPostForUpdate_whenNotAuthentication_thenError() {
         String title = "title";
         String body = "body";
         String userName = "userName";
@@ -122,6 +122,58 @@ public class PostServiceTest {
         when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
 
         SnsApplicationException e = assertThrows(SnsApplicationException.class, () -> postService.modify(title, body, userName, postId));
+        assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
+
+    }
+    
+    @DisplayName("포스트 삭제가 성공한 경우")
+    @Test
+    void givenPostForDelete_when_thenDeleted() {
+        String userName = "userName";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(userName, postId, 1);
+        UserEntity userEntity = postEntity.getUser();
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+
+        assertDoesNotThrow(() -> postService.delete(userName, 1));
+
+    }
+    
+    @DisplayName("포스트 삭제시 포스트가 존재하지 않는 경우")
+    @Test
+    void givenPostForDelete_whenNotExistedPost_thenError() {
+        String userName = "userName";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(userName, postId, 1);
+        UserEntity userEntity = postEntity.getUser();
+        // mocking
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.empty());
+
+        SnsApplicationException e = assertThrows(SnsApplicationException.class, () -> postService.delete(userName, postId));
+        assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+
+    }
+    
+    @DisplayName("포스트 삭제시 권한이 없는 경우")
+    @Test
+    void givenPostForDelete_whenNotAuthentication_thenError() {
+        String userName = "userName";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(userName, postId, 2);
+        UserEntity writer = UserEntityFixture.get("userName1", "password", 2);
+        // mocking
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(writer));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+
+        SnsApplicationException e = assertThrows(SnsApplicationException.class, () -> postService.delete(userName, postId));
         assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
 
     }

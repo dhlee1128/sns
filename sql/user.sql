@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS public."user"
     id integer NOT NULL DEFAULT nextval('user_id_seq'::regclass),
     password character varying(255) COLLATE pg_catalog."default",
     registered_at timestamp without time zone,
-    removed_at timestamp without time zone,
+    deleted_at timestamp without time zone,
     role character varying(255) COLLATE pg_catalog."default",
     updated_at timestamp without time zone,
     user_name character varying(255) COLLATE pg_catalog."default",
