@@ -38,7 +38,7 @@ Coded by www.creative-tim.com
 // Material Dashboard 2 React layouts
 import Feed from 'layouts/feed';
 import Post from 'layouts/post';
-import MyPosts from 'layouts/MyPosts';
+import MyPosts from 'layouts/myposts';
 import SignIn from 'layouts/authentication/sign-in';
 import SignUp from 'layouts/authentication/sign-up';
 

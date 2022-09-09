@@ -35,7 +35,7 @@ public class UserControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private UserService userService;
+    UserService userService;
 
     @DisplayName("회원가입이 성공한다.")
     @Test

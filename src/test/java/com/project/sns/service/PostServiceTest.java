@@ -15,6 +15,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.project.sns.exception.ErrorCode;
 import com.project.sns.exception.SnsApplicationException;
+import com.project.sns.fixture.PostEntityFixture;
+import com.project.sns.fixture.UserEntityFixture;
 import com.project.sns.model.entity.PostEntity;
 import com.project.sns.model.entity.UserEntity;
 import com.project.sns.repository.PostEntityRepository;
@@ -61,7 +63,66 @@ public class PostServiceTest {
         SnsApplicationException e = assertThrows(SnsApplicationException.class, () -> postService.create(title, body, userName));
         assertEquals(ErrorCode.USER_NOT_FOUND, e.getErrorCode());
 
+    }
+    
+    @DisplayName("포스트 수정이 성공한 경우")
+    @Test
+    void givenPost_when_thenModified() {
+        String title = "title";
+        String body = "body";
+        String userName = "userName";
+        Integer postId = 1;
 
+        PostEntity postEntity = PostEntityFixture.get(userName, postId, 1);
+        UserEntity userEntity = postEntity.getUser();
+        // mocking
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+        when(postEntityRepository.saveAndFlush(any())).thenReturn(postEntity);
+
+        assertDoesNotThrow(() -> postService.modify(title, body, userName, postId));
+
+    }
+    
+    @DisplayName("포스트 수정시 포스트가 존재하지 않는 경우")
+    @Test
+    void givenPost_whenNotExistedPost_thenError() {
+        String title = "title";
+        String body = "body";
+        String userName = "userName";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(userName, postId, 1);
+        UserEntity userEntity = postEntity.getUser();
+        // mocking
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.empty());
+
+        SnsApplicationException e = assertThrows(SnsApplicationException.class, () -> postService.modify(title, body, userName, postId));
+        assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+
+    }
+    
+    @DisplayName("포스트 수정시 권한이 없는 경우")
+    @Test
+    void givenPost_whenNotAuthentication_thenError() {
+        String title = "title";
+        String body = "body";
+        String userName = "userName";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(userName, postId, 2);
+        UserEntity userEntity = postEntity.getUser();
+        UserEntity writer = UserEntityFixture.get("userName1", "password", 2);
+        // mocking
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(writer));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+
+        SnsApplicationException e = assertThrows(SnsApplicationException.class, () -> postService.modify(title, body, userName, postId));
+        assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
 
     }
 }
