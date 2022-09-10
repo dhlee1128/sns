@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -183,5 +185,55 @@ public class PostControllerTest {
         ).andDo(print())
         .andExpect(status().isUnauthorized());
     }
+
+    
+    @DisplayName("피트 목록을 가져오는 경우")
+    @Test
+    @WithMockUser
+    void givenRequestFeed_when_thenGetFeed() throws Exception {
+        when(postService.list(any())).thenReturn(Page.empty());
+
+        mockMvc.perform(get("/api/v1/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+        .andExpect(status().isOk());
+    }
+    
+    @DisplayName("피드목록 요청시 로그인하지 않은 경우")
+    @Test
+    @WithAnonymousUser
+    void givenRequestFeed_whenNotLogined_thenError() throws Exception {
+        when(postService.list(any())).thenReturn(Page.empty());
+
+        mockMvc.perform(delete("/api/v1/posts/1")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+        .andExpect(status().isUnauthorized());
+    }
+    
+    @DisplayName("내피트 목록을 가져오는 경우")
+    @Test
+    @WithMockUser
+    void givenRequestMyFeed_when_thenGetMyFeed() throws Exception {
+        when(postService.my(any(), any())).thenReturn(Page.empty());
+
+        mockMvc.perform(get("/api/v1/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+        .andExpect(status().isOk());
+    }
+    
+    @DisplayName("내피드목록 요청시 로그인하지 않은 경우")
+    @Test
+    @WithAnonymousUser
+    void givenRequestMyFeed_whenNotLogined_thenError() throws Exception {
+        when(postService.my(any(), any())).thenReturn(Page.empty());
+
+        mockMvc.perform(delete("/api/v1/posts/1")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+        .andExpect(status().isUnauthorized());
+    }
+    
 
 }
