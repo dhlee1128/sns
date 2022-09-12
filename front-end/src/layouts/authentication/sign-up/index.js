@@ -71,8 +71,8 @@ function Cover() {
     console.log(password);
 
     axios({
-      method: 'post',
       url: '/api/v1/users/join',
+      method: 'POST',
       data: {
         name: userName,
         password: password,
