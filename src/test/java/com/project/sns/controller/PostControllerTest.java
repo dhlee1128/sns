@@ -49,7 +49,7 @@ public class PostControllerTest {
     @DisplayName("포스트 작성")
     @Test
     @WithMockUser
-    void given_when_then() throws Exception {
+    void givenPost_when_thenSuccess() throws Exception {
         String title = "title";
         String body = "body";
 

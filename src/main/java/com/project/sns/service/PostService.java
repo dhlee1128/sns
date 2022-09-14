@@ -34,8 +34,9 @@ public class PostService {
     @Transactional
     public void create(String title, String body, String userName) {
         UserEntity userEntity = getUserOrException(userName);
-
-        postEntityRepository.save(PostEntity.of(title, body, userEntity));
+        PostEntity postEntity = PostEntity.of(title, body, userEntity);
+        
+        postEntityRepository.save(postEntity);
     }
 
     @Transactional
