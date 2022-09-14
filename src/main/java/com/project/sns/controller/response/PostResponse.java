@@ -30,6 +30,4 @@ public class PostResponse {
             post.getUpdatedAt()
         );
     }
-
-
 }

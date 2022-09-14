@@ -13,6 +13,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.sns.controller.request.PostCommentRequest;
 import com.project.sns.controller.request.PostCreateRequest;
 import com.project.sns.exception.ErrorCode;
 import com.project.sns.exception.SnsApplicationException;
@@ -51,7 +52,6 @@ public class PostControllerTest {
     void given_when_then() throws Exception {
         String title = "title";
         String body = "body";
-
 
         mockMvc.perform(post("/api/v1/posts")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -263,6 +263,41 @@ public class PostControllerTest {
 
         mockMvc.perform(post("/api/v1/posts/1/likes")
                 .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+        .andExpect(status().isNotFound());
+    }
+    
+    @DisplayName("댓글 기능")
+    @Test
+    @WithMockUser
+    void given_when_thenComments() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/1/comments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new PostCommentRequest("comment")))
+        ).andDo(print())
+        .andExpect(status().isOk());
+    }
+    
+    @DisplayName("댓글 작성시 로그인하지 않은 경우")
+    @Test
+    @WithAnonymousUser
+    void givenComments_whenNotLogined_thenError() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/1/comments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new PostCommentRequest("comment")))
+        ).andDo(print())
+        .andExpect(status().isUnauthorized());
+    }
+    
+    @DisplayName("댓글 작성시 게시글이 없는 경우")
+    @Test
+    @WithMockUser
+    void givenComments_whenNotExisted_thenError() throws Exception {
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(any(), any(), any());
+
+        mockMvc.perform(post("/api/v1/posts/1/comments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new PostCommentRequest("comment")))
         ).andDo(print())
         .andExpect(status().isNotFound());
     }

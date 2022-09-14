@@ -2,16 +2,15 @@ package com.project.sns.model.entity;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -23,34 +22,29 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "\"post\"")
+@Table(name = "\"comment\"", indexes = {
+    @Index(name = "post_id_idx", columnList = "post_id")
+})
 @Getter
 @Setter
-@SQLDelete(sql = "UPDATE \"post\" SET deleted_at = NOW() WHERE id=?")
+@SQLDelete(sql = "UPDATE \"comment\" SET deleted_at = NOW() WHERE id=?")
 @Where(clause = "deleted_at is NULL")
-public class PostEntity {
+public class CommentEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "title")
-    private String title;
-
-    @Column(name = "body", columnDefinition = "TEXT")
-    private String body;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity user; 
 
-    @OneToMany
+    @ManyToOne
     @JoinColumn(name = "post_id")
-    private List<CommentEntity> comments;
+    private PostEntity post;
 
-    @OneToMany
-    @JoinColumn(name = "post_id")
-    private List<LikeEntity> likes;
+    @Column(name = "comment")
+    private String comment;
 
     @Column(name = "registered_at")
     private Timestamp registeredAt;
@@ -71,12 +65,15 @@ public class PostEntity {
         this.updatedAt = Timestamp.from(Instant.now());
     }
 
-    public static PostEntity of(String title, String body, UserEntity userEntity) {
-        PostEntity entity = new PostEntity();
-        entity.setTitle(title);
-        entity.setBody(body);
+    public static CommentEntity of(UserEntity userEntity, PostEntity post, String comment) {
+        CommentEntity entity = new CommentEntity();
         entity.setUser(userEntity);
+        entity.setPost(post);
+        entity.setComment(comment);
         
         return entity;
     }
+
+    
 }
+
